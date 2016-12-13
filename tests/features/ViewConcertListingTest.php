@@ -13,11 +13,9 @@ class ViewConcertListingTest extends TestCase
     /**
      * @test
      */
-    function user_can_view_a_concert_listing()
+    function user_can_view_a_published_concert_listing()
     {
-        //Arrange
-        //Create a concert
-        $concert = Concert::create([
+        $concert = factory(Concert::class)->states('published')->create([
             'title' => 'The White Lies',
             'subtitle' => 'New Album Tour',
             'date' => Carbon::parse('January 10th, 2017 8:00pm'),
@@ -30,12 +28,8 @@ class ViewConcertListingTest extends TestCase
             'additional_information' => 'For tickets, call (555) 555-5555'
         ]);
 
-        //Act
-        //View concert listing
         $this->visit('/concerts/' . $concert->id);
 
-        //Assert
-        //Verify we can see concert details†
         $this->see('The White Lies');
         $this->see('New Album Tour');
         $this->see('January 10th, 2017');
@@ -45,5 +39,17 @@ class ViewConcertListingTest extends TestCase
         $this->see('19 9th Street');
         $this->see('New York, NY 10001');
         $this->see('For tickets, call (555) 555-5555');
+    }
+
+    /**
+     * @test
+     */
+    function user_cannot_view_unpublished_concert_listings()
+    {
+        $concert = factory(Concert::class)->states('unpublished')->create();
+
+        $this->get('/concerts/' . $concert->id);
+
+        $this->assertResponseStatus(404);
     }
 }
