@@ -1,9 +1,31 @@
 <?php
 
+use App\Billing\FakePaymentGateway;
+use App\Concert;
 use App\Reservation;
+use App\Ticket;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class ReservationTest extends TestCase
 {
+    use DatabaseMigrations;
+
+    /**
+     * @test
+     */
+    function retrieving_the_reservations_tickets()
+    {
+        $tickets = collect([
+            (object) ['price' => 1200],
+            (object) ['price' => 1200],
+            (object) ['price' => 1200]
+        ]);
+
+        $reservation = new Reservation($tickets, 'john@example.com');
+
+        $this->assertEquals($tickets, $reservation->tickets());
+    }
+
     /**
      * @test
      */
@@ -15,33 +37,52 @@ class ReservationTest extends TestCase
             (object) ['price' => 1200]
         ]);
 
-        $reservation = new Reservation($tickets);
+        $reservation = new Reservation($tickets, 'john@example.com');
 
         $this->assertEquals(3600, $reservation->totalCost());
+    }
+
+    /** @test */
+    function reserved_tickets_are_released_when_a_reservation_is_canceled()
+    {
+        $tickets = collect([
+            Mockery::spy(Ticket::class),
+            Mockery::spy(Ticket::class),
+            Mockery::spy(Ticket::class)
+        ]);
+
+        $reservation = new Reservation($tickets, 'john@example.com');
+
+        $reservation->cancel();
+
+        foreach ($tickets as $ticket) {
+            $ticket->shouldHaveReceived('release')->once();
+        }
     }
 
     /**
      * @test
      */
-    function reserved_tickets_are_released_when_a_reservation_is_canceled()
+    function retrieving_the_customers_email()
     {
-        $ticket1 = Mockery::mock(Ticket::class);
-        $ticket1->shouldReceive('release')->once();
+        $reservation = new Reservation(collect(), 'larry@thenycgolfer.com');
 
-        $ticket2 = Mockery::mock(Ticket::class);
-        $ticket2->shouldReceive('release')->once();
+        $this->assertEquals('larry@thenycgolfer.com', $reservation->email());
+    }
 
-        $ticket3 = Mockery::mock(Ticket::class);
-        $ticket3->shouldReceive('release')->once();
+    /** @test */
+    function completing_a_reservation()
+    {
+        $concert = factory(Concert::class)->create(['ticket_price' => 1200]);
+        $tickets = factory(Ticket::class, 3)->create(['concert_id' => $concert->id]);
+        $reservation = new Reservation($tickets, 'larry@thenycgolfer.com');
+        $paymentGateway = new FakePaymentGateway;
 
-        $tickets = collect([
-            $ticket1,
-            $ticket2,
-            $ticket3
-        ]);
+        $order = $reservation->complete($paymentGateway, $paymentGateway->getValidTestToken());
 
-        $reservation = new Reservation($tickets);
-
-        $reservation->cancel();
+        $this->assertEquals('larry@thenycgolfer.com', $order->email);
+        $this->assertEquals(3, $order->ticketQuantity());
+        $this->assertEquals(3600, $order->amount);
+        $this->assertEquals(3600, $paymentGateway->totalCharges());
     }
 }

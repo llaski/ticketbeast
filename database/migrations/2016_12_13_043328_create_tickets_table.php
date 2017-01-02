@@ -13,7 +13,7 @@ class CreateTicketsTable extends Migration
      */
     public function up()
     {
-        Schema::create('Tickets', function (Blueprint $table) {
+        Schema::create('tickets', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('concert_id');
             $table->unsignedInteger('order_id')->nullable();
@@ -29,6 +29,6 @@ class CreateTicketsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Tickets');
+        Schema::dropIfExists('tickets');
     }
 }
