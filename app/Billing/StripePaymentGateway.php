@@ -4,6 +4,7 @@ namespace App\Billing;
 
 use Stripe\Charge;
 use Stripe\Error\InvalidRequest;
+use Stripe\Token;
 
 class StripePaymentGateway implements PaymentGateway
 {
@@ -27,4 +28,43 @@ class StripePaymentGateway implements PaymentGateway
         }
     }
 
+    public function getValidTestToken()
+    {
+        return Token::create([
+            "card" => [
+                "number" => "4242424242424242",
+                "exp_month" => 1,
+                "exp_year" => date('Y') + 1,
+                "cvc" => "123"
+            ]
+        ], [
+            'api_key' => $this->apiKey
+        ])->id;
+    }
+
+    public function newChargesDuring($callback)
+    {
+        $latestCharge = $this->lastCharge();
+        $callback($this);
+        return $this->newChargesSince($latestCharge)->pluck('amount');
+    }
+
+    private function lastCharge()
+    {
+        return Charge::all(
+            ['limit' => 1],
+            ['api_key' => $this->apiKey]
+        )['data'][0];
+    }
+
+    private function newChargesSince($latestCharge)
+    {
+        $newCharges = Charge::all([
+                'ending_before' => $latestCharge->id
+            ],
+            ['api_key' => $this->apiKey]
+        )['data'];
+
+        return collect($newCharges);
+    }
 }
