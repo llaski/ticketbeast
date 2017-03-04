@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
-class ViewConcertListingTest extends TestCase
+class ViewOrderTest extends TestCase
 {
     use DatabaseMigrations;
 
