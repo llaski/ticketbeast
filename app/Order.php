@@ -2,7 +2,7 @@
 
 namespace App;
 
-use Facades\App\OrderConfirmationNumber;
+use App\Facades\OrderConfirmationNumber;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
