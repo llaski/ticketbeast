@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Billing\Charge;
 use App\Facades\OrderConfirmationNumber;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,12 +25,13 @@ class Order extends Model
         return $this->tickets()->count();
     }
 
-    public static function forTickets($tickets, $email, $amount)
+    public static function forTickets($tickets, $email, Charge $charge)
     {
         $order = self::create([
             'confirmation_number' => OrderConfirmationNumber::generate(),
             'email' => $email,
-            'amount' => $amount
+            'amount' => $charge->amount(),
+            'card_last_four' => $charge->cardLastFour()
         ]);
 
         foreach ($tickets as $ticket) {
