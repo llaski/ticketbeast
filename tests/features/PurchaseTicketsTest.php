@@ -3,7 +3,8 @@
 use App\Billing\FakePaymentGateway;
 use App\Billing\PaymentGateway;
 use App\Concert;
-use App\OrderConfirmationNumberGenerator;
+use App\Facades\OrderConfirmationNumber;
+use App\Facades\TicketCode;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
@@ -57,11 +58,8 @@ class PurchaseTicketsTest extends TestCase
     {
         $this->disableExceptionHandling();
 
-        $orderConfirmationNumberGenerator = Mockery::mock(OrderConfirmationNumberGenerator::class, [
-            'generate' => 'ORDERCONFIRMATION1234'
-        ]);
-
-        $this->app->instance(OrderConfirmationNumberGenerator::class, $orderConfirmationNumberGenerator);
+        OrderConfirmationNumber::shouldReceive('generate')->andReturn('ORDERCONFIRMATION1234');
+        TicketCode::shouldReceive('generateFor')->andReturn('TICKETCODE1', 'TICKETCODE2', 'TICKETCODE3');
 
         $concert = factory(Concert::class)->states('published')->create(['ticket_price' => 3999])->addTickets(3);
 
@@ -76,8 +74,12 @@ class PurchaseTicketsTest extends TestCase
         $this->seeJsonSubset([
             'confirmation_number' => 'ORDERCONFIRMATION1234',
             'email' => 'larry@thenycgolfer.com',
-            'ticket_quantity' => 3,
-            'amount' => 11997
+            'amount' => 11997,
+            'tickets' => [
+                ['code' => 'TICKETCODE1'],
+                ['code' => 'TICKETCODE2'],
+                ['code' => 'TICKETCODE3']
+            ]
         ]);
 
         $this->assertEquals(11997, $this->paymentGateway->totalCharges());
