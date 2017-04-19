@@ -3,11 +3,13 @@
 use App\Billing\FakePaymentGateway;
 use App\Billing\PaymentGateway;
 use App\Concert;
+use Illuminate\Support\Facades\Mail;
 use App\Facades\OrderConfirmationNumber;
 use App\Facades\TicketCode;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
+use App\Mail\OrderConfirmationEmail;
 
 class PurchaseTicketsTest extends TestCase
 {
@@ -19,6 +21,8 @@ class PurchaseTicketsTest extends TestCase
 
         $this->paymentGateway = new FakePaymentGateway;
         $this->app->instance(PaymentGateway::class, $this->paymentGateway);
+
+        Mail::fake();
     }
 
     private function orderTickets($concert, $params)
@@ -82,9 +86,16 @@ class PurchaseTicketsTest extends TestCase
             ]
         ]);
 
+        $order = $concert->ordersFor('larry@thenycgolfer.com')->first();
+
         $this->assertEquals(11997, $this->paymentGateway->totalCharges());
         $this->assertTrue($concert->hasOrderFor('larry@thenycgolfer.com'));
-        $this->assertEquals(3, $concert->ordersFor('larry@thenycgolfer.com')->first()->ticketQuantity());
+        $this->assertEquals(3, $order->ticketQuantity());
+
+        Mail::assertSent(OrderConfirmationEmail::class, function($mail) use ($order) {
+            return $mail->hasTo('larry@thenycgolfer.com')
+                && $mail->order->id === $order->id;
+        });
     }
 
     /**
