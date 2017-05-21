@@ -14,7 +14,6 @@ class PromoterLoginTest extends TestCase
     /** @test */
     public function logging_in_with_valid_credentials()
     {
-        //Setup data
         $user = factory(User::class)->create([
             'email' => 'jane@example.com',
             'password' => bcrypt('super-secret-password')
@@ -33,7 +32,6 @@ class PromoterLoginTest extends TestCase
     /** @test */
     public function logging_in_with_invalid_credentials()
     {
-        //Setup data
         $user = factory(User::class)->create([
             'email' => 'jane@example.com',
             'password' => bcrypt('super-secret-password')
