@@ -11,6 +11,11 @@ class Concert extends Model
 
     protected $dates = ['date'];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function getFormattedDateAttribute()
     {
         return $this->date->format('F jS, Y');
