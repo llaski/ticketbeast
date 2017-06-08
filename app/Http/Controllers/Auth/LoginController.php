@@ -10,6 +10,7 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
+        dd(\App\User::all());
         return view('auth.login');
     }
 
