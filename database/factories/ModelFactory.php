@@ -32,14 +32,15 @@ $factory->define(App\Concert::class, function (Faker\Generator $faker) {
         },
         'title' => 'Example Band',
         'subtitle' => 'With the Fake Openers',
+        'additional_information' => 'Some sample additional information',
         'date' => Carbon::parse('+2 weeks'),
-        'ticket_price' => 2000,
         'venue' => 'The Example Theater',
         'venue_address' => '123 Fake Street',
         'city' => 'New York',
         'state' => 'NY',
         'zip' => '12345',
-        'additional_information' => 'Some sample additional information'
+        'ticket_price' => 2000,
+        'ticket_quantity' => 5
     ];
 });
 

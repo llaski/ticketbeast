@@ -25,6 +25,13 @@ abstract class TestCase extends BaseTestCase
         Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
     }
 
+    protected function from($url)
+    {
+        session()->setPreviousUrl(url($url));
+
+        return $this;
+    }
+
     protected function disableExceptionHandling()
     {
         $this->app->instance(ExceptionHandler::class, new class extends Handler {
