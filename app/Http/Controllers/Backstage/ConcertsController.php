@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Backstage;
 
-use App\Concert;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -48,12 +47,12 @@ class ConcertsController extends Controller
             'city' => request('city'),
             'state' => request('state'),
             'zip' => request('zip'),
+            'ticket_quantity' => (int) request('ticket_quantity')
         ]);
 
-        $concert->addTickets(request('ticket_quantity'));
         $concert->publish();
 
-        return redirect()->route('concerts.show', $concert);
+        return redirect()->route('backstage.concerts.index');
     }
 
     public function edit($id)
@@ -67,6 +66,9 @@ class ConcertsController extends Controller
 
     public function update($id)
     {
+        $concert = Auth::user()->concerts()->findOrFail($id);
+        abort_if($concert->isPublished(), 403);
+
         $this->validate(request(), [
             'title' => ['required'],
             'date' => ['required', 'date'],
@@ -79,9 +81,6 @@ class ConcertsController extends Controller
             'ticket_price' => ['required', 'numeric', 'min:5'],
             'ticket_quantity' => ['required', 'numeric', 'min:1'],
         ]);
-
-        $concert = Auth::user()->concerts()->findOrFail($id);
-        abort_if($concert->isPublished(), 403);
 
         $concert->update([
             'title' => request('title'),
