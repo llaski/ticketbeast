@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\AttendeeMessage;
 use App\Exceptions\NotEnoughTicketsException;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,6 +15,11 @@ class Concert extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function attendeeMessages()
+    {
+        return $this->hasMany(AttendeeMessage::class);
     }
 
     public function getFormattedDateAttribute()
@@ -48,7 +54,7 @@ class Concert extends Model
     }
 
     public function orders() {
-        return $this->belongsToMany(Order::class, 'tickets');
+        return Order::whereIn('id', $this->tickets()->pluck('order_id'));
     }
 
     public function hasOrderFor($email)
@@ -97,5 +103,25 @@ class Concert extends Model
     public function ticketsRemaining()
     {
         return $this->tickets()->available()->count();
+    }
+
+    public function ticketsSold()
+    {
+        return $this->tickets()->sold()->count();
+    }
+
+    public function totalTickets()
+    {
+        return $this->tickets()->count();
+    }
+
+    public function percentSoldOut()
+    {
+        return number_format(($this->ticketsSold() / $this->totalTickets()) * 100, 2);
+    }
+
+    public function revenueInDollars()
+    {
+        return $this->orders()->sum('amount') / 100;
     }
 }

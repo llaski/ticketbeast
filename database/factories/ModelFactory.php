@@ -78,3 +78,13 @@ $factory->define(App\Order::class, function (Faker\Generator $faker) {
         'card_last_four' => '1234'
     ];
 });
+
+$factory->define(App\AttendeeMessage::class, function (Faker\Generator $faker) {
+    return [
+        'concert_id' => function() {
+            return factory(App\Concert::class)->create()->id;
+        },
+        'subject' => 'Subect',
+        'message' => 'messageaz',
+    ];
+});

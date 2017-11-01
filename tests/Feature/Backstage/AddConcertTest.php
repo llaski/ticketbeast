@@ -6,7 +6,6 @@ use App\Concert;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class AddConcertTest extends TestCase
@@ -34,7 +33,7 @@ class AddConcertTest extends TestCase
     /**
      * @test
      */
-    public function promoters_can_view_the_add_concert_form()
+    public function promotersCanViewTheAddConcertForm()
     {
         $user = factory(User::class)->create();
 
@@ -46,7 +45,7 @@ class AddConcertTest extends TestCase
     /**
      * @test
      */
-    public function guests_cannot_view_the_add_concert_form()
+    public function guestsCannotViewTheAddConcertForm()
     {
         $response = $this->get('/backstage/concerts/new');
 
@@ -55,10 +54,8 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function adding_a_valid_concert()
+    public function addingAValidConcert()
     {
-        $this->disableExceptionHandling();
-
         $user = factory(User::class)->create();
 
         $response = $this->actingAs($user)->post('/backstage/concerts', [
@@ -81,7 +78,7 @@ class AddConcertTest extends TestCase
             $response->assertRedirect('/backstage/concerts');
 
             $this->assertTrue($concert->user->is($user));
-            $this->assertTrue($concert->isPublished());
+            $this->assertFalse($concert->isPublished());
             $this->assertEquals('No Warning', $concert->title);
             $this->assertEquals('with Cruel Hand and Backtrack', $concert->subtitle);
             $this->assertEquals("You must be 19 years of age to attend this concert.", $concert->additional_information);
@@ -93,12 +90,12 @@ class AddConcertTest extends TestCase
             $this->assertEquals('12345', $concert->zip);
             $this->assertEquals(3250, $concert->ticket_price);
             $this->assertEquals(75, $concert->ticket_quantity);
-            $this->assertEquals(75, $concert->ticketsRemaining());
+            $this->assertEquals(0, $concert->ticketsRemaining());
         });
     }
 
     /** @test */
-    function guests_cannot_add_a_new_concert()
+    public function guestsCannotAddANewConcert()
     {
         $response = $this->post('/backstage/concerts', $this->validParams());
 
@@ -108,11 +105,11 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function title_is_required()
+    public function titleIsRequired()
     {
         $user = factory(User::class)->create();
 
-        $response =  $this->actingAs($user)
+        $response = $this->actingAs($user)
             ->from('/backstage/concerts/new')
             ->post('/backstage/concerts', $this->validParams([
                 'title' => '',
@@ -125,13 +122,11 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function subtitle_is_optional()
+    public function subtitleIsOptional()
     {
-        $this->disableExceptionHandling();
-
         $user = factory(User::class)->create();
 
-        $response =  $this->actingAs($user)
+        $response = $this->actingAs($user)
             ->post('/backstage/concerts', $this->validParams([
                 'subtitle' => '',
             ]));
@@ -146,10 +141,8 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function additional_information_is_optional()
+    public function additionalInformationIsOptional()
     {
-        $this->disableExceptionHandling();
-
         $user = factory(User::class)->create();
 
         $response = $this->actingAs($user)->post('/backstage/concerts', $this->validParams([
@@ -166,7 +159,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function date_is_required()
+    public function dateIsRequired()
     {
         $user = factory(User::class)->create();
         $response = $this->actingAs($user)->from('/backstage/concerts/new')->post('/backstage/concerts', $this->validParams([
@@ -178,7 +171,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function date_must_be_a_valid_date()
+    public function dateMustBeAValidDate()
     {
         $user = factory(User::class)->create();
 
@@ -192,7 +185,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function time_is_required()
+    public function timeIsRequired()
     {
         $user = factory(User::class)->create();
 
@@ -206,7 +199,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function time_must_be_a_valid_time()
+    public function timeMustBeAValidTime()
     {
         $user = factory(User::class)->create();
 
@@ -220,7 +213,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function venue_is_required()
+    public function venueIsRequired()
     {
         $user = factory(User::class)->create();
 
@@ -234,7 +227,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function venue_address_is_required()
+    public function venueAddressIsRequired()
     {
         $user = factory(User::class)->create();
 
@@ -248,7 +241,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function city_is_required()
+    public function cityIsRequired()
     {
         $user = factory(User::class)->create();
 
@@ -262,7 +255,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function state_is_required()
+    public function stateIsRequired()
     {
         $user = factory(User::class)->create();
 
@@ -276,7 +269,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function zip_is_required()
+    public function zipIsRequired()
     {
         $user = factory(User::class)->create();
 
@@ -290,7 +283,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function ticket_price_is_required()
+    public function ticketPriceIsRequired()
     {
         $user = factory(User::class)->create();
 
@@ -304,7 +297,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function ticket_price_must_be_numeric()
+    public function ticketPriceMustBeNumeric()
     {
         $user = factory(User::class)->create();
 
@@ -318,7 +311,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function ticket_price_must_be_at_least_5()
+    public function ticketPriceMustBeAtLeast5()
     {
         $user = factory(User::class)->create();
 
@@ -332,7 +325,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function ticket_quantity_is_required()
+    public function ticketQuantityIsRequired()
     {
         $user = factory(User::class)->create();
 
@@ -346,7 +339,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function ticket_quantity_must_be_numeric()
+    public function ticketQuantityMustBeNumeric()
     {
         $user = factory(User::class)->create();
 
@@ -360,7 +353,7 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    function ticket_quantity_must_be_at_least_1()
+    public function ticketQuantityMustBeAtLeast1()
     {
         $user = factory(User::class)->create();
 

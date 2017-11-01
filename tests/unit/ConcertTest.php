@@ -8,8 +8,6 @@ use App\Order;
 use App\Ticket;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 
 class ConcertTest extends TestCase
@@ -19,10 +17,10 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function can_get_formatted_date()
+    public function canGetFormattedDate()
     {
         $concert = factory(Concert::class)->make([
-            'date' => Carbon::parse('2017-01-10 8:00pm')
+            'date' => Carbon::parse('2017-01-10 8:00pm'),
         ]);
 
         $this->assertEquals('January 10th, 2017', $concert->formatted_date);
@@ -31,10 +29,10 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function can_get_formatted_start_time()
+    public function canGetFormattedStartTime()
     {
         $concert = factory(Concert::class)->make([
-            'date' => Carbon::parse('2017-01-10 17:00:00')
+            'date' => Carbon::parse('2017-01-10 17:00:00'),
         ]);
 
         $this->assertEquals('5:00pm', $concert->formatted_start_time);
@@ -43,10 +41,10 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function can_get_ticket_price_in_dollars()
+    public function canGetTicketPriceInDollars()
     {
         $concert = factory(Concert::class)->make([
-            'ticket_price' => 4250
+            'ticket_price' => 4250,
         ]);
 
         $this->assertEquals('$42.50', $concert->ticket_price_in_dollars);
@@ -55,18 +53,18 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function concerts_with_a_published_at_date_are_published()
+    public function concertsWithAPublishedAtDateArePublished()
     {
         $publishedConcertA = factory(Concert::class)->create([
-            'published_at' => Carbon::parse('-1 week')
+            'published_at' => Carbon::parse('-1 week'),
         ]);
 
         $publishedConcertB = factory(Concert::class)->create([
-            'published_at' => Carbon::parse('-2 week')
+            'published_at' => Carbon::parse('-2 week'),
         ]);
 
         $publishedConcertC = factory(Concert::class)->create([
-            'published_at' => null
+            'published_at' => null,
         ]);
 
         $publishedConcerts = Concert::published()->get();
@@ -77,11 +75,11 @@ class ConcertTest extends TestCase
     }
 
     /** @test */
-    public function concerts_can_be_published()
+    public function concertsCanBePublished()
     {
         $concert = factory(Concert::class)->create([
             'published_at' => null,
-            'ticket_quantity' => 5
+            'ticket_quantity' => 5,
         ]);
 
         $this->assertFalse($concert->isPublished());
@@ -93,11 +91,10 @@ class ConcertTest extends TestCase
         $this->assertEquals(5, $concert->ticketsRemaining());
     }
 
-
     /**
      * @test
      */
-    function can_add_tickets()
+    public function canAddTickets()
     {
         $concert = factory(Concert::class)->create();
 
@@ -109,20 +106,72 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function tickets_remaining_does_not_include_tickets_associated_with_an_order()
+    public function ticketsRemainingDoesNotIncludeTicketsAssociatedWithAnOrder()
     {
         $concert = factory(Concert::class)->create();
 
-        $concert->tickets()->saveMany(factory(Ticket::class, 30)->create(['order_id' => 1]));
-        $concert->tickets()->saveMany(factory(Ticket::class, 20)->create(['order_id' => null]));
+        $concert->tickets()->saveMany(factory(Ticket::class, 3)->create(['order_id' => 1]));
+        $concert->tickets()->saveMany(factory(Ticket::class, 2)->create(['order_id' => null]));
 
-        $this->assertEquals(20, $concert->ticketsRemaining());
+        $this->assertEquals(2, $concert->ticketsRemaining());
     }
 
     /**
      * @test
      */
-    function trying_to_reserve_more_tickets_than_remain_throws_an_exception()
+    public function ticketsSoldOnlyIncludesTicketsAssociatedWithAnOrder()
+    {
+        $concert = factory(Concert::class)->create();
+
+        $concert->tickets()->saveMany(factory(Ticket::class, 3)->create(['order_id' => 1]));
+        $concert->tickets()->saveMany(factory(Ticket::class, 2)->create(['order_id' => null]));
+
+        $this->assertEquals(3, $concert->ticketsSold());
+    }
+
+    /**
+     * @test
+     */
+    public function totalTicketsIncludesAllTickets()
+    {
+        $concert = factory(Concert::class)->create();
+
+        $concert->tickets()->saveMany(factory(Ticket::class, 3)->create(['order_id' => 1]));
+        $concert->tickets()->saveMany(factory(Ticket::class, 2)->create(['order_id' => null]));
+
+        $this->assertEquals(5, $concert->totalTickets());
+    }
+
+    /**
+     * @test
+     */
+    public function calculateThePercentageOfTicketsSold()
+    {
+        $concert = factory(Concert::class)->create();
+
+        $concert->tickets()->saveMany(factory(Ticket::class, 2)->create(['order_id' => 1]));
+        $concert->tickets()->saveMany(factory(Ticket::class, 5)->create(['order_id' => null]));
+
+        $this->assertEquals(28.57, $concert->percentSoldOut());
+    }
+
+    /** @test */
+    public function calculatingTheRevenueInDollars()
+    {
+        $concert = factory(Concert::class)->create();
+        $orderA = factory(Order::class)->create(['amount' => 3850]);
+        $orderB = factory(Order::class)->create(['amount' => 9625]);
+
+        $concert->tickets()->saveMany(factory(Ticket::class, 2)->create(['order_id' => $orderA->id]));
+        $concert->tickets()->saveMany(factory(Ticket::class, 5)->create(['order_id' => $orderB->id]));
+
+        $this->assertEquals(134.75, $concert->revenueInDollars());
+    }
+
+    /**
+     * @test
+     */
+    public function tryingToReserveMoreTicketsThanRemainThrowsAnException()
     {
         $concert = factory(Concert::class)->create()->addTickets(10);
 
@@ -140,7 +189,7 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function can_reserve_available_tickets()
+    public function canReserveAvailableTickets()
     {
         $concert = factory(Concert::class)->create()->addTickets(5);
         $this->assertEquals(5, $concert->ticketsRemaining());
@@ -155,7 +204,7 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function cannot_reserve_tickets_that_have_already_been_purchased()
+    public function cannotReserveTicketsThatHaveAlreadyBeenPurchased()
     {
         $concert = factory(Concert::class)->create()->addTickets(3);
         $order = factory(Order::class)->create();
@@ -174,7 +223,7 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function cannot_reserve_tickets_that_have_already_been_reserved()
+    public function cannotReserveTicketsThatHaveAlreadyBeenReserved()
     {
         $concert = factory(Concert::class)->create()->addTickets(3);
         $concert->reserveTickets(2, 'jack@example.com');

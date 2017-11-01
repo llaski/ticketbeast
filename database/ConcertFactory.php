@@ -2,13 +2,18 @@
 
 use App\Concert;
 
-class ConcertFactory {
-
+class ConcertFactory
+{
     public static function createPublished($overrides = [])
     {
         $concert = factory(Concert::class)->states('published')->create($overrides);
         $concert->publish();
 
         return $concert;
+    }
+
+    public static function createUnpublished($overrides = [])
+    {
+        return factory(Concert::class)->states('unpublished')->create($overrides);
     }
 }
