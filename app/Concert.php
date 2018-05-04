@@ -5,6 +5,7 @@ namespace App;
 use App\AttendeeMessage;
 use App\Exceptions\NotEnoughTicketsException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Concert extends Model
 {
@@ -53,7 +54,8 @@ class Concert extends Model
         $this->addTickets($this->ticket_quantity);
     }
 
-    public function orders() {
+    public function orders()
+    {
         return Order::whereIn('id', $this->tickets()->pluck('order_id'));
     }
 
@@ -67,13 +69,14 @@ class Concert extends Model
         return $this->orders()->where('email', $email)->get();
     }
 
-    public function tickets() {
+    public function tickets()
+    {
         return $this->hasMany(Ticket::class);
     }
 
     public function reserveTickets($quantity, $email)
     {
-        $tickets = $this->findTickets($quantity)->each(function($ticket) {
+        $tickets = $this->findTickets($quantity)->each(function ($ticket) {
             $ticket->reserve();
         });
 
@@ -123,5 +126,15 @@ class Concert extends Model
     public function revenueInDollars()
     {
         return $this->orders()->sum('amount') / 100;
+    }
+
+    public function hasPoster()
+    {
+        return $this->poster_image_path !== null;
+    }
+
+    public function posterUrl()
+    {
+        return Storage::disk('public')->url($this->poster_image_path);
     }
 }

@@ -17,6 +17,5 @@
         @stack('beforeScripts')
         <script src="{{ mix('js/app.js') }}"></script>
         @stack('afterScripts')
-        {{ svg_spritesheet() }}
     </body>
 </html>

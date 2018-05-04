@@ -371,7 +371,7 @@ class AddConcertTest extends TestCase
     /** @test */
     public function aPosterImageIsUploadedIfIncluded()
     {
-        Storage::fake('s3');
+        Storage::fake('public');
 
         $user = factory(User::class)->create();
         $file = File::image('concert-poster.png', 850, 1100);
@@ -382,10 +382,10 @@ class AddConcertTest extends TestCase
 
         tap(Concert::first(), function ($concert) use ($file) {
             $this->assertNotNull($concert->poster_image_path);
-            Storage::disk('s3')->assertExists($concert->poster_image_path);
+            Storage::disk('public')->assertExists($concert->poster_image_path);
             $this->assertFileExists(
                 $file->getPathname(),
-                Storage::disk('s3')->path($concert->poster_image_path)
+                Storage::disk('public')->path($concert->poster_image_path)
             );
         });
     }
@@ -393,7 +393,7 @@ class AddConcertTest extends TestCase
     /** @test */
     public function posterImageMustBeAnImage()
     {
-        Storage::fake('s3');
+        Storage::fake('public');
         $user = factory(User::class)->create();
         $file = File::create('not-a-poster.pdf');
 
@@ -407,11 +407,11 @@ class AddConcertTest extends TestCase
     }
 
     /** @test */
-    public function posterImageMustBeAtLeast400pxWide()
+    public function posterImageMustBeAtLeast600pxWide()
     {
-        Storage::fake('s3');
+        Storage::fake('public');
         $user = factory(User::class)->create();
-        $file = File::image('poster.png', 399, 516);
+        $file = File::image('poster.png', 599, 775);
 
         $response = $this->actingAs($user)->from('/backstage/concerts/new')->post('/backstage/concerts', $this->validParams([
             'poster_image' => $file,
@@ -426,7 +426,7 @@ class AddConcertTest extends TestCase
     public function posterImageMustHaveLetterAspectRatio()
     {
         //Letter aspect ration - 8.5 x 11
-        Storage::fake('s3');
+        Storage::fake('public');
         $user = factory(User::class)->create();
         $file = File::image('poster.png', 400);
 
