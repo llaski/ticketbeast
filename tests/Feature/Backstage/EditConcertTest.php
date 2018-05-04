@@ -149,7 +149,7 @@ class EditConcertTest extends TestCase
     /** @test */
     public function promotersCanEditTheirOwnUnpublishedConcerts()
     {
-        $this->disableExceptionHandling();
+        $this->withoutExceptionHandling();
 
         $user = factory(User::class)->create();
         $concert = factory(Concert::class)->create($this->oldAttributes([

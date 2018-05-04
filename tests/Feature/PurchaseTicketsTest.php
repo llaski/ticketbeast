@@ -61,7 +61,7 @@ class PurchaseTicketsTest extends TestCase
      */
     public function customerCanPurchaseTicketsToAPublishedConcert()
     {
-        $this->disableExceptionHandling();
+        $this->withoutExceptionHandling();
 
         OrderConfirmationNumber::shouldReceive('generate')->andReturn('ORDERCONFIRMATION1234');
         TicketCode::shouldReceive('generateFor')->andReturn('TICKETCODE1', 'TICKETCODE2', 'TICKETCODE3');
@@ -181,7 +181,7 @@ class PurchaseTicketsTest extends TestCase
      */
     public function anOrderIsNotCreatedIfPaymentFails()
     {
-        $this->disableExceptionHandling();
+        $this->withoutExceptionHandling();
 
         $concert = factory(Concert::class)->states('published')->create([
             'ticket_price' => 3250,
@@ -240,7 +240,7 @@ class PurchaseTicketsTest extends TestCase
      */
     public function cannotPurchaseTicketsAnotherCustomerIsAlreadyTryingToPurchase()
     {
-        $this->disableExceptionHandling();
+        $this->withoutExceptionHandling();
 
         $concert = factory(Concert::class)->states('published')->create(['ticket_price' => 1200])->addTickets(3);
 

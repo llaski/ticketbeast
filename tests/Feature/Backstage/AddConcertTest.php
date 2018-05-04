@@ -462,7 +462,7 @@ class AddConcertTest extends TestCase
     /** @test */
     public function anEventIsFiredWhenAConcertIsAdded()
     {
-        $this->disableExceptionHandling();
+        $this->withoutExceptionHandling();
 
         Event::fake([ConcertAdded::class]);
 

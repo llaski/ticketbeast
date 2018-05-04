@@ -55,7 +55,7 @@ class MessageAttendeesTest extends TestCase
     /** @test */
     public function aPromoterCanSendANewMessage()
     {
-        $this->deh();
+        $this->weh();
 
         Queue::fake();
         $user = factory(User::class)->create();

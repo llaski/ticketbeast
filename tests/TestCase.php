@@ -31,10 +31,6 @@ abstract class TestCase extends BaseTestCase
             return $this->original->getData()[$key];
         });
 
-        TestResponse::macro('assertViewIs', function ($name) {
-            Assert::assertEquals($name, $this->original->name());
-        });
-
         EloquentCollection::macro('assertContains', function ($value) {
             Assert::assertTrue($this->contains($value), "Failed asserting that the collection contains the specified value.");
         });
@@ -53,30 +49,8 @@ abstract class TestCase extends BaseTestCase
         });
     }
 
-    // public function from(string $url)
-    // {
-    //     session()->setPreviousUrl(url($url));
-
-    //     return $this;
-    // }
-
-    protected function disableExceptionHandling()
+    protected function weh()
     {
-        $this->app->instance(ExceptionHandler::class, new class extends Handler
-        {
-            public function __construct()
-            {}
-            public function report(Exception $e)
-            {}
-            public function render($request, Exception $e)
-            {
-                throw $e;
-            }
-        });
-    }
-
-    protected function deh()
-    {
-        $this->disableExceptionHandling();
+        $this->withoutExceptionHandling();
     }
 }
