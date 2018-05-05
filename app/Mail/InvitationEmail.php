@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Invitation;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -31,6 +30,7 @@ class InvitationEmail extends Mailable
      */
     public function build()
     {
-        return $this->view('view.name');
+        return $this->view('emails/invitation-email')
+            ->subject("You're invited to join TicketBeast!");
     }
 }
