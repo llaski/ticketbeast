@@ -91,6 +91,7 @@ $factory->define(App\AttendeeMessage::class, function (Faker\Generator $faker) {
 
 $factory->define(App\Invitation::class, function (Faker\Generator $faker) {
     return [
-        // 'code' => 'Subect',
+        'email' => 'somebody@example.com',
+        'code' => '123456'
     ];
 });
