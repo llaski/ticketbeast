@@ -88,3 +88,9 @@ $factory->define(App\AttendeeMessage::class, function (Faker\Generator $faker) {
         'message' => 'messageaz',
     ];
 });
+
+$factory->define(App\Invitation::class, function (Faker\Generator $faker) {
+    return [
+        // 'code' => 'Subect',
+    ];
+});
