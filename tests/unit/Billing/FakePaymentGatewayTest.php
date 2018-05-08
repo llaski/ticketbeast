@@ -14,6 +14,18 @@ class FakePaymentGatewayTest extends TestCase
         return new FakePaymentGateway;
     }
 
+    /** @test */
+    public function canGetTotalChargesForASpecificAccount()
+    {
+        $paymentGateway = new FakePaymentGateway;
+
+        $paymentGateway->charge(1000, $paymentGateway->getValidTestToken(), 'test_acct_0000');
+        $paymentGateway->charge(2500, $paymentGateway->getValidTestToken(), 'test_acct_1234');
+        $paymentGateway->charge(4000, $paymentGateway->getValidTestToken(), 'test_acct_1234');
+
+        $this->assertEquals(6500, $paymentGateway->totalChargesFor('test_acct_1234'));
+    }
+
     /**
      * @test
      */
@@ -23,12 +35,12 @@ class FakePaymentGatewayTest extends TestCase
         $timesCallbackRan = 0;
 
         $paymentGateway->beforeFirstCharge(function($paymentGateway) use (&$timesCallbackRan) {
-            $paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
+            $paymentGateway->charge(2500, $paymentGateway->getValidTestToken(), 'test_acct_0000');
             $timesCallbackRan++;
             $this->assertEquals(2500, $paymentGateway->totalCharges());
         });
 
-        $paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
+        $paymentGateway->charge(2500, $paymentGateway->getValidTestToken(), 'test_acct_0000');
 
         $this->assertEquals(5000, $paymentGateway->totalCharges());
         $this->assertEquals(1, $timesCallbackRan);

@@ -20,9 +20,9 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
-        'password' => $password ?: $password = bcrypt('secret'),
+        'password' => '$2y$10$0b6JGBT21H47A5fQflQGmOMxih028.o/xD1nYwEVExC5gV4nClmQy', //"secret"
         'remember_token' => str_random(10),
-        'stripe_account_id' => 'sk_acct_1234',
+        'stripe_account_id' => 'test_acct_1234',
         'stripe_access_token' => 'test_token'
     ];
 });
